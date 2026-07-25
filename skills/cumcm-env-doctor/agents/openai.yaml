@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 环境自检"
+  short_description: "检查 CUMCM 竞赛工作区的 Python 环境、依赖与工具可用性"
+  default_prompt: "Use $cumcm-env-doctor to inspect a CUMCM contest workspace environment."

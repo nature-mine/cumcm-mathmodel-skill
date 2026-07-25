@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 编程"
+  short_description: "实现 CUMCM 模型计算、可复现验证、结果登记与数据图"
+  default_prompt: "Use $cumcm-coding to implement a frozen CUMCM model contract with reproducible results and lane-A figures."

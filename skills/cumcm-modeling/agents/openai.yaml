@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 建模"
+  short_description: "建立 CUMCM 子问题的模型假设、推导、验证与实现交接"
+  default_prompt: "Use $cumcm-modeling to formulate one confirmed CUMCM subproblem and return an implementation-ready modeling artifact."

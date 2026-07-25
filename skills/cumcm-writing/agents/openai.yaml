@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 论文写作"
+  short_description: "依据冻结证据撰写 CUMCM 论文并确定性导出含完整附录的 DOCX"
+  default_prompt: "Use $cumcm-writing to draft a CUMCM paper from frozen evidence, run the style pass, and export a visually verified DOCX with deterministic appendices."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 图示"
+  short_description: "路由 CUMCM 数据图、精确结构图与概念图并登记初稿或占位"
+  default_prompt: "Use $cumcm-diagram to route a CUMCM figure and create a draw.io draft or an API-free concept placeholder."

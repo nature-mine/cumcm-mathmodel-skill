@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 评审"
+  short_description: "对 CUMCM 建模、代码与论文执行分步检查和最终独立评审"
+  default_prompt: "Use $cumcm-review to perform an audit-only step review or evidence-based final CUMCM review with P0/P1/P2 findings."

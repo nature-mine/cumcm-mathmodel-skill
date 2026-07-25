@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "status": "recommended_style_not_official_typography",
+  "note": "A4 与不小于 25 mm 页边距按当届官方规则复核；字体、字号、行距是本包推荐值，赛区要求优先。",
+  "page": {
+    "width_mm": 210,
+    "height_mm": 297,
+    "margin_top_mm": 25,
+    "margin_bottom_mm": 25,
+    "margin_left_mm": 25,
+    "margin_right_mm": 25
+  },
+  "fonts": {
+    "body_east_asia": "宋体",
+    "body_latin": "Times New Roman",
+    "heading_east_asia": "黑体",
+    "code_east_asia": "等线",
+    "code_latin": "Consolas"
+  },
+  "sizes_pt": {
+    "title": 18,
+    "heading_1": 16,
+    "heading_2": 14,
+    "heading_3": 12,
+    "body": 10.5,
+    "caption": 9,
+    "code": 7.5,
+    "footer": 9
+  },
+  "paragraph": {
+    "line_spacing": 1.5,
+    "first_line_indent_cm": 0.74,
+    "space_after_pt": 0,
+    "heading_space_before_pt": 8,
+    "heading_space_after_pt": 6
+  },
+  "figures": {
+    "max_width_mm": 150,
+    "placeholder_height_mm": 55,
+    "placeholder_fill": "F2F2F2"
+  }
+}

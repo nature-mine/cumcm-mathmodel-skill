@@ -1,0 +1,4 @@
+interface:
+  display_name: "CUMCM 主控"
+  short_description: "编排 CUMCM 竞赛全流程、任务契约、验收门禁与返工闭环"
+  default_prompt: "Use $cumcm-hub to coordinate a CUMCM contest workflow from intake through review."
