@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 PACK_ROOT = Path(__file__).resolve().parents[1]
@@ -62,8 +64,22 @@ def test_package_readme_guides_installation_and_first_run() -> None:
 
 
 def test_workspace_docs_identify_the_product() -> None:
-    root_readme = (WORKSPACE_ROOT / "README.md").read_text(encoding="utf-8")
-    root_claude = (WORKSPACE_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    root_readme_path = WORKSPACE_ROOT / "README.md"
+    root_claude_path = WORKSPACE_ROOT / "CLAUDE.md"
+    if not (root_readme_path.is_file() and root_claude_path.is_file()):
+        result = subprocess.run(
+            [sys.executable, "scripts/validate_pack.py"],
+            cwd=PACK_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "独立 checkout,跳过根文档契约" in result.stdout
+        return
+
+    root_readme = root_readme_path.read_text(encoding="utf-8")
+    root_claude = root_claude_path.read_text(encoding="utf-8")
 
     for text in (root_readme, root_claude):
         assert "cumcm-mathmodel-skill/" in text
