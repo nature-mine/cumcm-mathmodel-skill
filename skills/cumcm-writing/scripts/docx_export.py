@@ -26,8 +26,9 @@ SOFTWARE.
 
 This version narrows the Markdown contract for CUMCM, adds workspace path
 safety, deterministic ZIP metadata, figure slots, automatic appendix source
-import, and a support-material manifest. Runtime dependency python-docx is
-supplied by the cumcm-env-doctor Tier 0 contract.
+import, editable OMML equations, and a support-material manifest. Runtime
+dependencies python-docx and latex2mathml are supplied by the
+cumcm-env-doctor Tier 0 contract.
 """
 
 from __future__ import annotations
@@ -42,11 +43,13 @@ import sys
 import zipfile
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
 DEFAULT_SPEC = Path(__file__).resolve().parents[1] / "templates" / "cumcm-docx-spec.yaml"
+MATHML_TO_OMML_XSL = Path(__file__).with_name("mathml_to_omml.xsl")
 IGNORED_PARTS = {
     ".git",
     ".mypy_cache",
@@ -66,11 +69,48 @@ GENERATED_SUFFIXES = {
     ".pyo",
     ".so",
 }
-DIRECTIVE_PATTERN = re.compile(r"^\[\[(FIGURE|PLACEHOLDER|TABLE)\s+(.+)\]\]$")
+DIRECTIVE_PATTERN = re.compile(
+    r"^\[\[(EQUATION|FIGURE|PLACEHOLDER|TABLE)\s+(.+)\]\]$"
+)
 LINK_PATTERN = re.compile(r"\[([^\]]+)]\([^)]+\)")
 INLINE_MARK_PATTERN = re.compile(r"(\*\*|__|`)")
 NEGATIVE_NUMBER_PATTERN = re.compile(r"(?<![A-Za-z0-9_])-(?=\d)")
 FIXED_ZIP_TIME = (2000, 1, 1, 0, 0, 0)
+MATHML_NAMESPACE = "http://www.w3.org/1998/Math/MathML"
+SUPPORTED_MATHML_ELEMENTS = {
+    "math",
+    "mfrac",
+    "mi",
+    "mn",
+    "mo",
+    "mover",
+    "mpadded",
+    "mroot",
+    "mrow",
+    "mspace",
+    "msqrt",
+    "mstyle",
+    "msub",
+    "msubsup",
+    "msup",
+    "mtable",
+    "mtd",
+    "mtext",
+    "mtr",
+    "munder",
+    "munderover",
+}
+MATHML_TOKEN_ELEMENTS = {"mi", "mn", "mo", "mtext"}
+MATHML_FIXED_ARITY = {
+    "mfrac": 2,
+    "mover": 2,
+    "mroot": 2,
+    "msub": 2,
+    "msubsup": 3,
+    "msup": 2,
+    "munder": 2,
+    "munderover": 3,
+}
 
 
 @dataclass(frozen=True)
@@ -127,6 +167,27 @@ def _load_docx_api() -> SimpleNamespace:
         RGBColor=RGBColor,
         Twips=Twips,
     )
+
+
+@lru_cache(maxsize=1)
+def _load_equation_api() -> SimpleNamespace:
+    try:
+        from latex2mathml.converter import convert
+        from lxml import etree
+    except ModuleNotFoundError as error:
+        raise RuntimeError(
+            "缺少 Tier 0 公式依赖 latex2mathml；先运行 cumcm-env-doctor 并按报告安装。"
+        ) from error
+
+    if not MATHML_TO_OMML_XSL.is_file():
+        raise RuntimeError(f"缺少公式转换资源：{MATHML_TO_OMML_XSL}")
+    parser = etree.XMLParser(resolve_entities=False, no_network=True)
+    try:
+        stylesheet = etree.parse(str(MATHML_TO_OMML_XSL), parser)
+        transform = etree.XSLT(stylesheet)
+    except (OSError, etree.XMLSyntaxError, etree.XSLTParseError) as error:
+        raise RuntimeError(f"公式转换资源无效：{MATHML_TO_OMML_XSL}") from error
+    return SimpleNamespace(convert=convert, etree=etree, transform=transform)
 
 
 def _safe_workspace_path(
@@ -294,13 +355,13 @@ def _configure_styles(document: Any, api: SimpleNamespace, spec: dict[str, Any])
             True,
         ),
         "Heading 2": (
-            fonts["heading_east_asia"],
+            fonts["subheading_east_asia"],
             fonts["body_latin"],
             sizes["heading_2"],
             True,
         ),
         "Heading 3": (
-            fonts["heading_east_asia"],
+            fonts["subheading_east_asia"],
             fonts["body_latin"],
             sizes["heading_3"],
             True,
@@ -336,6 +397,7 @@ def _configure_styles(document: Any, api: SimpleNamespace, spec: dict[str, Any])
         heading_format.keep_with_next = True
         heading_format.space_before = api.Pt(paragraph["heading_space_before_pt"])
         heading_format.space_after = api.Pt(paragraph["heading_space_after_pt"])
+    document.styles["Heading 1"].paragraph_format.alignment = api.WD_ALIGN_PARAGRAPH.CENTER
 
 
 def _configure_document(document: Any, api: SimpleNamespace, spec: dict[str, Any]) -> None:
@@ -453,6 +515,135 @@ def _require_fields(kind: str, fields: dict[str, str], required: set[str]) -> No
     extra = sorted(fields.keys() - required)
     if missing or extra:
         raise ValueError(f"{kind} 指令字段不匹配：missing={missing}, extra={extra}")
+
+
+def _equation_error(reason: str) -> ValueError:
+    return ValueError(f"EQUATION LaTeX 无效：{reason}")
+
+
+def _validate_latex_source(latex: str) -> str:
+    value = latex.strip()
+    if not value:
+        raise _equation_error("表达式为空")
+    if "$" in value:
+        raise _equation_error("latex 字段不得包含 $ 定界符")
+    if any(ord(character) < 32 for character in value):
+        raise _equation_error("表达式含控制字符")
+
+    depth = 0
+    escaped = False
+    for character in value:
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\":
+            escaped = True
+        elif character == "{":
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth < 0:
+                raise _equation_error("花括号不配对")
+    if depth:
+        raise _equation_error("花括号不配对")
+    return value
+
+
+def _mathml_local_name(element: Any, etree: Any) -> str:
+    return str(etree.QName(element).localname)
+
+
+def _mathml_has_content(element: Any, etree: Any) -> bool:
+    return any(
+        _mathml_local_name(descendant, etree) in MATHML_TOKEN_ELEMENTS
+        and bool((descendant.text or "").strip())
+        for descendant in element.iter()
+    )
+
+
+def _validate_mathml(root: Any, etree: Any) -> None:
+    elements = [element for element in root.iter() if isinstance(element.tag, str)]
+    for element in elements:
+        qualified_name = etree.QName(element)
+        if qualified_name.namespace != MATHML_NAMESPACE:
+            raise _equation_error("转换结果含非 MathML 元素")
+        local_name = str(qualified_name.localname)
+        if local_name not in SUPPORTED_MATHML_ELEMENTS:
+            raise _equation_error(f"暂不支持 MathML 元素 {local_name}")
+        if element.text and "\\" in element.text:
+            raise _equation_error(f"未知或不支持的 LaTeX 命令 {element.text}")
+
+    if _mathml_local_name(root, etree) != "math" or not _mathml_has_content(root, etree):
+        raise _equation_error("表达式没有可转换内容")
+
+    for element in elements:
+        local_name = _mathml_local_name(element, etree)
+        children = [child for child in element if isinstance(child.tag, str)]
+        required_arity = MATHML_FIXED_ARITY.get(local_name)
+        if required_arity is not None and len(children) != required_arity:
+            raise _equation_error(
+                f"{local_name} 需要 {required_arity} 个操作数，实际为 {len(children)}"
+            )
+        if required_arity is not None and any(
+            not _mathml_has_content(child, etree) for child in children
+        ):
+            raise _equation_error(f"{local_name} 含空操作数")
+        if local_name == "msqrt" and (
+            not children or not all(_mathml_has_content(child, etree) for child in children)
+        ):
+            raise _equation_error("msqrt 含空操作数")
+        if local_name == "mtable":
+            invalid_rows = (
+                not children
+                or any(_mathml_local_name(child, etree) != "mtr" for child in children)
+            )
+            if invalid_rows:
+                raise _equation_error("矩阵缺少有效行")
+            column_counts = {
+                len([cell for cell in row if isinstance(cell.tag, str)])
+                for row in children
+            }
+            if len(column_counts) != 1:
+                raise _equation_error("矩阵各行列数不一致")
+        if local_name == "mtr" and (
+            not children or any(_mathml_local_name(child, etree) != "mtd" for child in children)
+        ):
+            raise _equation_error("矩阵行缺少有效单元格")
+        if local_name == "mtd" and not _mathml_has_content(element, etree):
+            raise _equation_error("矩阵含空单元格")
+
+
+def _add_equation(
+    document: Any,
+    api: SimpleNamespace,
+    fields: dict[str, str],
+) -> None:
+    _require_fields("EQUATION", fields, {"latex"})
+    latex = _validate_latex_source(fields["latex"])
+    equation_api = _load_equation_api()
+    try:
+        mathml = equation_api.convert(latex, display="block")
+    except Exception as error:
+        raise _equation_error(f"转换失败（{type(error).__name__}）") from error
+
+    parser = equation_api.etree.XMLParser(resolve_entities=False, no_network=True)
+    try:
+        root = equation_api.etree.fromstring(mathml.encode("utf-8"), parser)
+    except equation_api.etree.XMLSyntaxError as error:
+        raise _equation_error("转换结果不是有效 MathML") from error
+    _validate_mathml(root, equation_api.etree)
+
+    try:
+        transformed = equation_api.transform(root)
+    except equation_api.etree.XSLTApplyError as error:
+        raise _equation_error("MathML 无法转换为可编辑 OMML") from error
+    omml = transformed.getroot()
+    if omml is None:
+        raise _equation_error("MathML 转换未产生 OMML")
+
+    paragraph = document.add_paragraph()
+    paragraph.paragraph_format.first_line_indent = None
+    paragraph._p.append(omml)
 
 
 def _set_picture_alt(inline_shape: Any, description: str) -> None:
@@ -793,7 +984,9 @@ def _render_markdown(
         directive = _parse_directive(stripped)
         if directive is not None:
             kind, fields = directive
-            if kind == "FIGURE":
+            if kind == "EQUATION":
+                _add_equation(document, api, fields)
+            elif kind == "FIGURE":
                 figure_count += 1
                 _add_figure(document, api, workspace, fields, spec, figure_count)
             elif kind == "PLACEHOLDER":

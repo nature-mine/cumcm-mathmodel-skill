@@ -74,6 +74,7 @@ REQUIRED_FILES = (
     "skills/cumcm-writing/references/paper-structure.md",
     "skills/cumcm-writing/references/style-quality.md",
     "skills/cumcm-writing/scripts/docx_export.py",
+    "skills/cumcm-writing/scripts/mathml_to_omml.xsl",
     "skills/cumcm-writing/templates/cumcm-docx-spec.yaml",
     "skills/cumcm-writing/templates/paper-template.docx",
     "skills/cumcm-writing/templates/paper-template.md",
@@ -491,6 +492,7 @@ def check_docx_assets() -> str:
         "references/award-style-profile.md",
     )
     required_layout_tokens = (
+        "[[EQUATION",
         "[[FIGURE",
         "[[PLACEHOLDER",
         "[[TABLE",
@@ -509,6 +511,7 @@ def check_docx_assets() -> str:
     )
     required_exporter_tokens = (
         "chinese-thesis-workbench-skill/scripts/docx/generate_thesis_docx.py",
+        "mathml_to_omml.xsl",
         "build_support_manifest",
         "_read_source_files",
         "_normalize_docx_zip",
@@ -567,8 +570,8 @@ def check_docx_assets() -> str:
 
     structure_headings = re.findall(r"^### (\d+\.\s+.+)$", structure, re.MULTILINE)
     template_headings = re.findall(r"^## (\d+\.\s+.+)$", template_source, re.MULTILINE)
-    if len(structure_headings) != 9 or template_headings != structure_headings:
-        raise ValidationFailure("paper-template.md 正文九节未与 paper-structure.md 对齐")
+    if len(structure_headings) != 10 or template_headings != structure_headings:
+        raise ValidationFailure("paper-template.md 正文十节未与 paper-structure.md 对齐")
     if "<!--" in template_source:
         raise ValidationFailure("paper-template.md 不得使用会泄漏到 DOCX 的 HTML 注释")
     if len(re.findall(r"^\[\[TABLE\b", template_source, re.MULTILINE)) != 2:

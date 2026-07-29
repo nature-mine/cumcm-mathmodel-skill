@@ -1,10 +1,48 @@
+<!--
+Adapted from:
+- https://github.com/capwitf/My-MathModeling-skills
+  - math-abstract/SKILL.md
+- https://github.com/ZyhSechub/chinese-thesis-workbench-skill
+  - references/writing/aigc-style-governance.md
+Upstream licenses: MIT
+Upstream copyrights:
+- Copyright (c) 2026 capwitf
+- Copyright (c) 2026 Zyhsec
+
+This file adapts abstract-style diagnosis and evidence-preserving revision
+checks without copying fixed prose templates or detector-evasion instructions.
+
+MIT License
+
+Copyright (c) 2026 capwitf
+Copyright (c) 2026 Zyhsec
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
 # 中文论文文风质量规则
 
 本规则只提高表达质量，不用于规避 AI 检测。AI 辅助事实必须继续按当届要求披露，检测器分数不作为改写目标或验收依据。
 
 ## 不得触碰的内容
 
-文风修改前先固定保护清单：`evidence/ledger.md` 中 frozen 的数值、单位、方向性结论、假设编号、公式定义、图表编号、引用对应关系和限制条件。任何改写都不得增加证据中不存在的例子、数据、因果关系或“创新点”。若一句话只有改动结论才能变顺，返回上游核对，不在写作期自行修算。
+文风修改前先固定保护清单：`evidence/ledger.md` 中 frozen 的数值、单位、方向性结论、假设编号、公式定义、图表编号、引用对应关系和限制条件。任何改写都不得增加证据中不存在的例子、数据、因果关系或“创新点”。若一句话只有改动结论才能变顺，返回上游核对，不在写作期自行修算。外部检测报告只能用于定位可能的表达风险，不能授权修改事实、数字、引用或结论。
 
 ## 写时自检
 
@@ -14,6 +52,9 @@
 - 依赖“此外、然而、综上所述、一方面……另一方面……”串接段落，却没有真实的因果、对比或递进关系；
 - 重复宽泛的大词，术语看似正式但没有指向具体变量、约束或机制；
 - 各点平均铺开，关键结果、验证和局限没有轻重；
+- 数字密集出现，却没有说明这些数字改变了哪个答案、方案、边界或验证判断；
+- 按处理顺序罗列多个方法，却没有同时给出相应结果及其决策含义；
+- 使用“研究表明”“专家认为”等匿名归因，却没有已核实来源；无法补证时应删除或明确标记待核验；
 - 只复述图表或常识，没有说明结果为何出现、如何验证以及适用边界；
 - 主语长期缺失或被动句堆叠，读者无法判断是谁建立模型、哪个变量产生作用。
 

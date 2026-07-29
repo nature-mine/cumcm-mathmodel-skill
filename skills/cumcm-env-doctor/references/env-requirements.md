@@ -22,6 +22,7 @@ uv 安装与 `uv venv` 命令依据 Astral 官方文档核验。环境管理器�
 | Matplotlib | `matplotlib` | 数据图 | `uv add matplotlib` |
 | openpyxl | `openpyxl` | 读取 `.xlsx` 官方附件 | `uv add openpyxl` |
 | python-docx | `docx` | DOCX 主交付 | `uv add python-docx` |
+| latex2mathml | `latex2mathml` | 把 LaTeX 公式离线转换为可编辑 OMML | `uv add latex2mathml` |
 | Skill 包 | 七个 `skills/*/SKILL.md` 与目录名一致 | 宿主加载基础 | 重新安装或修复 Skill 包 |
 
 脚本只能验证 Skill 包结构；宿主是否真正完成显式调用，由 hub 在启动时再验证。
