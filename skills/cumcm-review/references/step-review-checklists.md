@@ -1,3 +1,36 @@
+<!--
+Adapted from repository: https://github.com/ZyhSechub/chinese-thesis-workbench-skill
+Upstream license: MIT
+Upstream copyright: Copyright (c) 2026 Zyhsec
+Referenced upstream path:
+- references/delivery/final-delivery-check.md
+
+This file adapts selected final-delivery checks to the CUMCM review and
+rework protocol.
+
+MIT License
+
+Copyright (c) 2026 Zyhsec
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
 # 分步评审检查单
 
 每次只选一种工件检查单，并同时覆盖“数学核验 / 跨材料一致性 / 官方合规”。`不适用` 必须写理由；`无法验证` 不能视为通过。
@@ -8,6 +41,7 @@
 - [建模件](#建模件)
 - [代码件](#代码件)
 - [论文件](#论文件)
+- [返工复审](#返工复审)
 - [送回 hub](#送回-hub)
 
 ## 通用输入与输出
@@ -44,8 +78,10 @@
 - [ ] 符号唯一，类型、维度、单位、取值域和来源完整。
 - [ ] 公式量纲、边界、初始条件和参数来源一致。
 - [ ] 评价指标方向/权重、优化约束、预测划分、图算法前提或机理守恒按题型检查。
-- [ ] 候选路线、基线和推荐权衡真实，不把方法名当推导。
-- [ ] 主模型有可判定验证、灵敏度/稳健性方案和失效条件。
+- [ ] 候选路线、基线和推荐权衡结合题意、数据、约束及可验证性，不把方法名当推导。
+- [ ] 主模型的关键验证按建议说明对象、基准来源、评价指标、量化结果、结论影响及失效条件。
+- [ ] 按场景建议组合验证：预测检查回测、留出或简单基线，优化检查约束与方案对照，机理检查量纲、极限和收敛，路径检查坐标反代、碰撞与回放，随机风险检查分布、尾部与最坏情形，信号反演检查已知样本、重建误差与噪声扰动。
+- [ ] 求解说明按建议交代输入、输出、参数、初值、终止条件、软件，以及一次收敛或稳定性检查。
 - [ ] 使用置换负对照时默认不少于 1000 次并披露实际次数；降低次数必须说明依据与精度影响。
 - [ ] 样本筛选、缺失剔除和不同统计量的分母逐项写明；同一材料出现不同样本量时可追溯差异。
 - [ ] 灵敏度结论有实际结果文件支撑且不超出已运行场景；小样本经验高分位阈值披露不稳定性或给出扰动结果。
@@ -62,6 +98,7 @@
 - [ ] 与 startup lock、路线确认和任务 DAG 一致。
 - [ ] `data_profile.md` 的样本、字段和缺失事实没有被误写。
 - [ ] 编程接口固定输入字段、单位、参数、随机性、输出口径、精度与失败路径。
+- [ ] 多模型链按建议显式声明接口变量，上一模型输出在下一模型中按一致单位、时间尺度和索引引用，误差传播有说明。
 - [ ] 车道 A 图需求明确 claim 和数据来源。
 - [ ] 引用需求只占位，没有凭记忆生成文献条目。
 
@@ -113,27 +150,31 @@
 
 ### 数学与证据核验
 
-- [ ] 摘要含问题、方法、每问关键量化结果和结论。
+- [ ] 摘要含问题、方法、每问关键量化结果和结论，并按建议在关键结果或结论中至少给出一项验证或稳健性结论。
 - [ ] 每个子问题形成“机制/方法 → 结果 → 验证 → 解释 → 局限”。
+- [ ] 每个子问题按建议以关键数值、单位、现实解释和一项验证收束。
 - [ ] 所有量化结论只引用 `status=frozen` 的账本行。
 - [ ] 公式、假设编号、符号、单位和结果口径与上游一致。
-- [ ] 基线、灵敏度、稳健性和不确定性没有被省略或夸大。
+- [ ] 模型选择说明按建议结合题意、数据、约束与可验证性，不以精度或复杂度空泛代替理由。
+- [ ] 建议核查误差分析、对比实验、基线、灵敏度、稳健性和不确定性是否被省略或夸大。
 - [ ] 模型评价具体说明优缺点、范围和改进所需条件。
 
 ### 跨材料一致性
 
-- [ ] 摘要、正文、表格、图注、附录与 ledger 数字一致。
+- [ ] 摘要中的模型、结果和验证口径与正文、表格、图注、附录及 ledger 一致。
 - [ ] A 图是可复现数据图；B 为可编辑 draft；C 为显式 placeholder。
 - [ ] B/C 未充当 frozen 证据，精确结构图未走文生图。
 - [ ] 正文图表所在编号章节与 `figure_registry.md` 的 `chapter` 一致；B/C 的占位指令、说明和 prompt 章节也一致。
 - [ ] 引用逐条有真实性核验记录，作者、题名、年份、来源、卷期、页码和 DOI 均按原始来源核实；运行 `check_references.py` 检查结构和编号。
 - [ ] 附录代码由 `code/` 确定性导入，没有手抄、节选或改写。
 - [ ] 支撑材料清单正确区分 `input/` 与 `data/`。
+- [ ] 按建议从结论反向追溯到结果、模型和对应小问，模型验证、代码附件和复现入口均可定位。
 
 文风检查：
 
 - 是否大量使用“首先、其次、最后”串联而无逻辑关系；
 - 是否各段均匀铺陈、空泛总结、堆砌“显著提升/全面赋能”等大词；
+- 是否存在重复复述或缺少数据、图表、推导等证据支撑的判断；
 - 是否把方法说明写成 agent/prompt/派发/冻结/P0/里程碑/车道/占位槽等内部流程；单行 `PLACEHOLDER` 指令作为导出控制文本豁免；
 - 集中文风 pass 是否保持 frozen 数字和结论不变。
 
@@ -145,6 +186,11 @@
 
 - [ ] 使用当届已核实 profile，不沿用往届页数或大小。
 - [ ] 无目录；摘要专页、正文、页码、匿名和电子文件要求闭合。
+- [ ] 建议核对公式、图表及其编号是否完整、连续，正文引用与对应对象是否一致。
+- [ ] 建议通过终稿渲染核对中文、西文和数字字体是否存在明显混乱。
+- [ ] 终稿建议清零 `【待替换】`、待补说明、未处理批注和未接受或拒绝的修订记录。
+- [ ] 终稿建议清除裸露的 `**`、反引号、Markdown 标题符和 Markdown 链接语法等排版残留。
+- [ ] 合法单行 `PLACEHOLDER` 与 figure registry 中已登记的 B/C 工件按既有状态协议单独核验，不作为裸 Markdown 残留误报；提交前仍需确认未完成工件没有冒充定稿证据。
 - [ ] 附录含支撑材料清单和全部完整可运行源程序。
 - [ ] AI 正文标注、AI 工具参考条目和“AI 工具使用详情”三件套齐全。
 - [ ] 全文及支撑材料无身份信息、密钥或禁止联网来源。
@@ -156,6 +202,13 @@
 - 引用幻觉；
 - 章节证据链缺失导致结论无依据；
 - 匿名、页数、附录程序、支撑材料或 AI 披露硬性失败。
+
+## 返工复审
+
+- reviewer 必须重新打开返工后的工件及其证据，逐项复核原问题、受影响接口和相关 acceptance；只阅读返工摘要或变更说明不算复审。
+- 返工说明、作者自报通过或勾选结果不能替代工件、账本、代码、运行记录和渲染结果中的新证据。
+- 修改可能影响摘要、正文、图表、附录或下游结果时，必须重跑对应一致性与机械检查；原检查结果不得自动沿用。
+- 复审报告应逐项给出当前 PASS/FAIL、定位证据和仍需返工的最小范围。
 
 ## 送回 hub
 

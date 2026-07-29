@@ -63,7 +63,7 @@ def test_paper_template_regenerates_byte_for_byte_and_contains_contract(
     )
     template_headings = re.findall(r"^## (\d+\.\s+.+)$", template_text, re.MULTILINE)
     assert template_headings == body_headings
-    assert len(body_headings) == 9
+    assert len(body_headings) == 10
     assert "<!--" not in template_text
     assert len(re.findall(r"^\[\[TABLE\b", template_text, re.MULTILINE)) == 2
     assert len(re.findall(r'^\[\[PLACEHOLDER\b.*lane="B"', template_text, re.MULTILINE)) == 1
@@ -93,7 +93,7 @@ def test_paper_template_regenerates_byte_for_byte_and_contains_contract(
         if paragraph.style.name == "Heading 1"
     ]
     assert heading_texts == ["摘要", *body_headings]
-    assert heading_texts.count("9. 附录") == 1
+    assert heading_texts.count("10. 附录") == 1
     assert len(document.inline_shapes) == 0
 
     all_text = "\n".join(

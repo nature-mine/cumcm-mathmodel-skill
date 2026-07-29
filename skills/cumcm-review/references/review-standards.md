@@ -1,3 +1,37 @@
+<!--
+Adapted from repository: https://github.com/capwitf/My-MathModeling-skills
+Upstream license: MIT
+Upstream copyright: Copyright (c) 2026 capwitf
+Referenced upstream path:
+- math-review/SKILL.md
+
+This file adapts judge-perspective coverage and first-pass readability checks
+to the package's existing five-dimensional review framework. It does not add
+new scoring dimensions or weights.
+
+MIT License
+
+Copyright (c) 2026 capwitf
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
 # 最终评审标准
 
 本标准整理自历年公开评审细则的稳定维度，并针对本 Skill 包的证据协议自写；**具体口径以当届官方评审细则为准**。分数用于发现短板，不预测奖项。
@@ -5,6 +39,7 @@
 ## 目录
 
 - [评分原则](#评分原则)
+- [经验性评委覆盖层](#经验性评委覆盖层)
 - [五个评分维度](#1-假设合理性20)
 - [严重程度](#严重程度)
 - [置信度](#置信度)
@@ -18,6 +53,30 @@
 4. 总分是五项得分之和，范围 0–100。
 5. 不因论文类型、方法流行度、图表数量或文献数量机械加减分。
 6. 创新不得因无文献先例而压分；没有机制增量和验证的改名也不得冒充创新。
+7. 经验性质量复核中，验证与稳健性通常是最薄弱环节；在五维评分口径不变的前提下，建议优先核查基准、扰动及结论是否改变。
+
+## 经验性评委覆盖层
+
+下列观察视角用于补充评阅视野，不是新的官方评分维度，也不新增权重。发现的问题仍须映射到现有五维：
+
+| 观察视角 | 现有维度落点 | 建议关注 |
+| --- | --- | --- |
+| 现实问题到数学对象的对应 | 假设合理性、结果表述清晰性 | 原型、变量、目标、约束和输出能否逐项回到题面与真实场景 |
+| 抽象与简化的准确性 | 假设合理性、建模创造性 | 简化依据、边界和失效影响是否明确，是否保留决定结论的关键机制 |
+| 建模与求解过程的严谨性 | 假设合理性、结果表述清晰性 | 推导、算法、参数、接口和验证能否连续复核 |
+| 方法增量的真实性 | 建模创造性 | 新增结构相对基线改变了什么，收益是否有对照证据 |
+| 结果的应用与执行价值 | 结果表述清晰性、假设合理性 | 输出是否可执行，约束、风险和适用范围是否闭合 |
+| 整体呈现与交付可信度 | 结果表述清晰性、格式规范性、参考文献与引用 | 摘要、正文、图表、附录和引用是否便于定位且互相一致 |
+
+### 首屏快读
+
+评阅时间通常很紧，建议在完整核验前先做首屏快读，用于定位后续深查重点：
+
+- 题目与摘要能否直接识别研究对象、逐问答案、关键结果及验证结论；
+- 开篇能否迅速定位模型路线、关键变量、目标和约束，而非只看到方法名称；
+- 首批关键图表是否有单位、结论和证据去向，是否与摘要口径一致；
+- 标题层级、符号密度和段落组织是否让主答案易于找到；
+- 快读发现的疑点是否回到正文、账本、代码和运行记录核验，不以扫读印象代替正式评分。
 
 ## 1. 假设合理性（20）
 
@@ -26,6 +85,7 @@
 - 题意、决策对象、输入输出和子问题依赖是否正确；
 - 假设是否显式编号，并给出依据、范围、失效影响和验证；
 - 符号、单位、量纲、初边值条件和参数来源是否一致；
+- 是否按建议检查缺失、异常、单位、时间错位、样本筛选和数据泄漏，并交代处理依据；
 - 使用假设时是否回指，关键结论是否依赖未披露假设；
 - 极端条件、边界、可辨识性和适用范围是否得到检验。
 
@@ -41,6 +101,7 @@
 检查：
 
 - 方法是否针对题目特殊结构，而非只列通用算法名；
+- 相对更简单候选的选择理由是否按建议结合题意、数据、约束和可验证性；
 - 相对基线新增了什么机制、耦合、解析结果、方法组合或更难扩展；
 - 创新动机、实现、适用范围和实际收益是否闭合；
 - 与基线、消融或替代路线的比较是否支持贡献；
@@ -59,16 +120,30 @@
 - 没有文献先例也不是自动加分理由，仍须证明逻辑、有效性和适用范围。
 - 解析结论若只适用于未推荐策略，必须标为旁支结果，不能支撑主贡献。
 
+对自行命名或跨领域迁移的方法，建议额外检查：
+
+- 输入、输出、核心机制、数学表达和适用边界是否定义清楚，名称是否只是对已知方法的重包装；
+- 领域概念到变量、目标和约束的映射是否成立，数据条件与题目结构是否支持该迁移；
+- 是否用基线、替代路线、消融或边界实验说明实际增量，而非用陌生术语代替证据；
+- 是否提供足以复现并核查关键结论的参数、过程、结果和失败条件。
+
+不得仅因方法名称陌生或跨领域而压分，也不得因命名新颖而加分。评审者无法独立判断关键领域前提时，应降低该项置信度、列出待核问题并交 hub 安排相应领域专家复核。
+
 ## 3. 结果表述清晰性（25）
 
 检查：
 
 - 每个子问题是否形成“机制/方法 → 结果 → 验证 → 解释 → 局限”；
-- 摘要是否覆盖问题、方法、每问关键量化结果和结论；
+- 摘要是否覆盖问题、方法、每问关键量化结果和结论，并按建议在关键结果或结论中至少给出一项验证或稳健性结论；
 - 数字是否来自 frozen 证据，并保留单位、精度、场景和 provenance；
+- 多模型链是否按建议显式说明接口变量，上一模型输出是否按一致的单位、时间尺度和索引成为下一模型输入；
+- 每项关键验证是否按建议说明验证对象、基准来源、评价指标、量化结果及其对最优方案、阈值、排序或可行性的影响；
+- 是否按场景建议组合验证：预测检查回测、留出或简单基线，优化检查约束与方案对照，机理检查量纲、极限和收敛，路径检查坐标反代、碰撞与回放，随机风险检查分布、尾部与最坏情形，信号反演检查已知样本、重建误差与噪声扰动；
 - 是否有基线、灵敏度、稳健性、不确定性或失败案例；
+- 每问是否按建议以关键数值、单位、现实解释和一项验证收束，输出能否直接转化为题目要求的路线、排班、矩阵、阈值或方案；
 - 图表是否服务 claim，图题/图注/单位清楚，A/B/C 状态真实；
 - 文字是否直接回答题目，避免堆结果、重复图表和选择性报告。
+- 是否按建议从结论反向定位到结果、模型和对应小问，且模型验证、代码附件与复现入口没有断环。
 
 评分锚点：
 
@@ -84,6 +159,7 @@
 - 结构是否覆盖摘要、问题、分析、假设、符号、模型、结果、评价、参考文献和附录；
 - 当届页数、摘要专页、页码、匿名、文件格式和大小是否核实并满足；
 - 图表、公式、章节、引用编号是否连续且交叉引用正确；
+- 求解说明是否按建议交代输入、输出、参数、初值、终止条件、软件，以及一次收敛或稳定性检查；
 - 附录是否含支撑材料清单和完整可运行源程序，且与 `code/` 一致；
 - B/C 占位是否显式标记，未定稿图是否被冒充最终图；
 - AI 使用披露三件套和竞赛纪律是否闭合。
@@ -114,8 +190,6 @@
 - `10–12`：来源真实，但少量格式、定位或核验记录不完整。
 - `6–9`：方法与引用脱节、格式错误较多或多条真实性无法验证。
 - `0–5`：存在引用幻觉、伪造字段或正文/文末严重失配。
-
-“建议不少于 8 篇”只作常见参考，不是机械扣分线；方法创新型论文可以更少，但每条必须相关真实。
 
 ## 严重程度
 

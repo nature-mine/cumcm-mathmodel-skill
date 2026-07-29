@@ -7,6 +7,7 @@ import sys
 import zipfile
 from pathlib import Path
 from types import ModuleType
+from xml.etree import ElementTree
 
 import pytest
 from docx import Document
@@ -137,6 +138,7 @@ def test_export_applies_page_fonts_fields_and_is_byte_deterministic(tmp_path: Pa
     ):
         assert margin.mm >= 25
     assert document.styles["Normal"].font.name == "Times New Roman"
+    assert document.styles["Normal"].font.size.pt == 12
 
     with zipfile.ZipFile(first_path) as archive:
         document_xml = archive.read("word/document.xml").decode("utf-8")
@@ -148,6 +150,89 @@ def test_export_applies_page_fonts_fields_and_is_byte_deterministic(tmp_path: Pa
         assert " PAGE " in footer_xml
         assert 'w:updateFields w:val="true"' in settings_xml
         assert all(info.date_time == (2000, 1, 1, 0, 0, 0) for info in archive.infolist())
+
+
+def test_export_writes_editable_equation_and_remains_byte_deterministic(
+    tmp_path: Path,
+) -> None:
+    workspace, _ = _prepare_workspace(tmp_path)
+    module = _load_module("docx_export_equation")
+    source = workspace / "paper" / "equation.md"
+    source.write_text(
+        "# 公式导出\n\n"
+        "## 摘要\n\n"
+        "下式用于验证可编辑公式。\n\n"
+        r'[[EQUATION latex="y_i=\frac{x^2+\sqrt{\alpha}}{2}"]]' + "\n",
+        encoding="utf-8",
+    )
+
+    first = module.export_docx(workspace, "paper/equation.md", "paper/equation-first.docx")
+    second = module.export_docx(workspace, "paper/equation.md", "paper/equation-second.docx")
+    first_path = workspace / first.output
+    second_path = workspace / second.output
+
+    assert first_path.read_bytes() == second_path.read_bytes()
+    with zipfile.ZipFile(first_path) as archive:
+        document_bytes = archive.read("word/document.xml")
+    document_xml = document_bytes.decode("utf-8")
+    for token in ("<m:oMathPara>", "<m:f>", "<m:rad>", "<m:sSub>", "<m:sSup>"):
+        assert token in document_xml
+    assert "EQUATION latex" not in document_xml
+    document_root = ElementTree.fromstring(document_bytes)
+    namespaces = {
+        "m": "http://schemas.openxmlformats.org/officeDocument/2006/math",
+        "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    }
+    assert document_root.find(".//w:p/m:oMathPara", namespaces) is not None
+
+
+@pytest.mark.parametrize(
+    "latex",
+    (
+        r"\frac{1}",
+        r"\notacommand{x}",
+        r"\sqrt{}",
+        r"x_{1",
+    ),
+)
+def test_export_rejects_invalid_latex_without_writing_docx(
+    tmp_path: Path,
+    latex: str,
+) -> None:
+    workspace, _ = _prepare_workspace(tmp_path)
+    module = _load_module(f"docx_export_invalid_equation_{len(latex)}")
+    source = workspace / "paper" / "invalid-equation.md"
+    source.write_text(
+        f'# 非法公式\n\n[[EQUATION latex="{latex}"]]\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="EQUATION LaTeX 无效"):
+        module.export_docx(
+            workspace,
+            "paper/invalid-equation.md",
+            "paper/invalid-equation.docx",
+        )
+    assert not (workspace / "paper" / "invalid-equation.docx").exists()
+
+
+def test_export_rejects_unsupported_mathml_without_writing_docx(tmp_path: Path) -> None:
+    workspace, _ = _prepare_workspace(tmp_path)
+    module = _load_module("docx_export_unsupported_equation")
+    source = workspace / "paper" / "unsupported-equation.md"
+    source.write_text(
+        r'# 暂不支持的公式' "\n\n"
+        r'[[EQUATION latex="\cancel{x}"]]' "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="暂不支持 MathML 元素 menclose"):
+        module.export_docx(
+            workspace,
+            "paper/unsupported-equation.md",
+            "paper/unsupported-equation.docx",
+        )
+    assert not (workspace / "paper" / "unsupported-equation.docx").exists()
 
 
 def test_export_protects_negative_number_from_line_break(tmp_path: Path) -> None:

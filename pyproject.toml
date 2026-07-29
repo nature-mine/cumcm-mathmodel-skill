@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "CUMCM end-to-end workflow skill pack for Claude Code and Codex"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["latex2mathml==3.81.0"]
 
 [dependency-groups]
 dev = [
