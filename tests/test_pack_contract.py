@@ -18,6 +18,7 @@ SKILL_NAMES = {
 EXPECTED_TOP_LEVEL = {
     ".github",
     ".gitignore",
+    "AGENT_INSTALL.md",
     "LICENSE",
     "README.md",
     "THIRD_PARTY_NOTICES.md",
