@@ -173,10 +173,16 @@ def _load_docx_api() -> SimpleNamespace:
 def _load_equation_api() -> SimpleNamespace:
     try:
         from latex2mathml.converter import convert
-        from lxml import etree
     except ModuleNotFoundError as error:
         raise RuntimeError(
             "缺少 Tier 0 公式依赖 latex2mathml；先运行 cumcm-env-doctor 并按报告安装。"
+        ) from error
+    try:
+        from lxml import etree
+    except ModuleNotFoundError as error:
+        raise RuntimeError(
+            "缺少 Tier 0 公式依赖 lxml（通常随 python-docx 安装）；"
+            "先运行 cumcm-env-doctor 并按报告安装。"
         ) from error
 
     if not MATHML_TO_OMML_XSL.is_file():
@@ -501,6 +507,14 @@ def _parse_directive(line: str) -> tuple[str, dict[str, str]] | None:
     if match is None:
         return None
     kind, raw_fields = match.groups()
+    if kind == "EQUATION":
+        equation_match = re.fullmatch(r'^latex="([^"]*)"$', raw_fields)
+        if equation_match is None:
+            raise ValueError(
+                "EQUATION 的 latex 字段必须用双引号包裹，值内不得含双引号字符"
+            )
+        return kind, {"latex": equation_match.group(1)}
+
     fields: dict[str, str] = {}
     for token in shlex.split(raw_fields):
         key, separator, value = token.partition("=")
