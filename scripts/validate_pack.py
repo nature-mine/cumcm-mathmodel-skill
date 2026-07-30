@@ -21,6 +21,7 @@ SKILL_NAMES = (
 REQUIRED_FILES = (
     ".github/workflows/ci.yml",
     ".gitignore",
+    "AGENT_INSTALL.md",
     "LICENSE",
     "README.md",
     "THIRD_PARTY_NOTICES.md",
@@ -94,6 +95,7 @@ REQUIRED_FILES = (
 PRODUCT_TOP_LEVEL = {
     ".github",
     ".gitignore",
+    "AGENT_INSTALL.md",
     "LICENSE",
     "README.md",
     "THIRD_PARTY_NOTICES.md",
@@ -632,6 +634,7 @@ def check_smoke_validator_contract() -> str:
 
 def check_user_documentation() -> str:
     readme = (PACK_ROOT / "README.md").read_text(encoding="utf-8")
+    agent_install = (PACK_ROOT / "AGENT_INSTALL.md").read_text(encoding="utf-8")
     claude_workflow = (PACK_ROOT / "claude/workflows/cumcm-contest.md").read_text(
         encoding="utf-8"
     )
@@ -644,12 +647,16 @@ def check_user_documentation() -> str:
         "## 快速开始（3 步）",
         "install.sh claude",
         "### 让 Agent 帮你安装",
+        "AGENT_INSTALL.md",
         "## 手动安装（备选）",
         "### 接下来会发生什么",
         "## Skill 索引",
-        "## 宿主部署与分派规则",
+        "## Agent 部署与分派规则",
         "npx skills add \"$CUMCM_SKILL_PACK\" --list",
-        "二选一的单宿主",
+        "每个竞赛项目只用一个 Agent",
+        "vercel-labs/skills",
+        "WSL",
+        "不是环境变量",
         "--agent codex",
         "--agent claude-code",
         "npx skills list --agent codex --json",
@@ -661,7 +668,10 @@ def check_user_documentation() -> str:
         "env_report.md",
         "startup lock 六问",
         "模型路线确认是人工决策点",
-        "关闭安装前已打开的旧宿主会话",
+        "全权委托",
+        "旧会话看不到新安装的 Skill",
+        ".agents/skills/",
+        ".claude/skills/",
         "codex/agents/*.toml",
         "claude/agents/*.md",
         "claude/workflows/cumcm-contest.md",
@@ -669,14 +679,28 @@ def check_user_documentation() -> str:
         "fork_turns=\"none\"",
         "fallback_reason: subagent_unavailable",
         "必须 `blocked`，不得降级",
+        "Tier 0 硬性依赖",
         "不是“全自动出赛论文”工具",
         "skills/cumcm-writing/templates/paper-template.md",
         "tests/test_paper_template.py",
         "`tests/` 与包顶层 `scripts/` 是包质量工具链，不随 `skills add` 安装",
     )
+    required_agent_install_tokens = (
+        "install.sh",
+        "npx skills list --agent <codex|claude-code> --json",
+        ".agents/skills/",
+        ".claude/skills/",
+        ".codex/agents/",
+        ".claude/workflows/cumcm-contest.md",
+        "codex features list",
+        "不得修改克隆下来的包内容",
+        "不要在当前会话中替用户启动建模流程",
+    )
     for skill_name in SKILL_NAMES:
         if f"[`{skill_name}`]" not in readme:
             raise ValidationFailure(f"package README 的 Skill 索引缺少 {skill_name}")
+        if f"`{skill_name}`" not in agent_install:
+            raise ValidationFailure(f"AGENT_INSTALL.md 验收清单缺少 {skill_name}")
 
     claude_prompt = next(
         (
@@ -688,8 +712,13 @@ def check_user_documentation() -> str:
     )
     if claude_prompt is None or claude_prompt not in readme:
         raise ValidationFailure("package README 与 Claude workflow 的启动提示语不一致")
+    if claude_prompt not in agent_install:
+        raise ValidationFailure("AGENT_INSTALL.md 与 Claude workflow 的启动提示语不一致")
 
-    documents = [("package README", readme, required_readme_tokens)]
+    documents = [
+        ("package README", readme, required_readme_tokens),
+        ("AGENT_INSTALL", agent_install, required_agent_install_tokens),
+    ]
     if has_root_document_contract:
         stable_root_tokens = ("cumcm-mathmodel-skill/", "7 个 Skill")
         documents.extend(
@@ -712,7 +741,7 @@ def check_user_documentation() -> str:
             raise ValidationFailure(f"{label} 缺少产品文档条款：{missing}")
     if re.search(r"^## M\d+ ", readme, re.MULTILINE):
         raise ValidationFailure("package README 仍含里程碑实现约定")
-    message = "快速开始、七 Skill 索引、单宿主部署与使用边界说明完整"
+    message = "快速开始、七 Skill 索引、Agent 安装说明、单 Agent 部署与使用边界说明完整"
     if not has_root_document_contract:
         message += "；独立 checkout,跳过根文档契约"
     return message

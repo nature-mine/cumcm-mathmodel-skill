@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 一键把本 Skill 包安装到一个竞赛项目(单宿主:codex 或 claude 二选一)。
+# 一键把本 Skill 包安装到一个竞赛项目(每个项目只选一个 Agent:codex 或 claude)。
 # 用法:在竞赛项目根目录执行
 #   bash /path/to/cumcm-mathmodel-skill/install.sh <codex|claude>
 set -euo pipefail
@@ -29,10 +29,10 @@ if ! command -v npx >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> 1/4 安装 7 个 Skill(宿主: $HOST)"
+echo "==> 1/4 安装 7 个 Skill(目标 Agent: $HOST)"
 npx skills add "$PACK_DIR" --agent "$AGENT" --skill '*' --yes --copy
 
-echo "==> 2/4 部署宿主角色定义"
+echo "==> 2/4 部署 $HOST 角色定义"
 if [ "$HOST" = "codex" ]; then
   mkdir -p .codex/agents
   cp "$PACK_DIR"/codex/agents/*.toml .codex/agents/
@@ -48,13 +48,13 @@ mkdir -p input data
 echo "==> 4/4 验收:以下列表应包含 7 个 cumcm-* Skill"
 npx skills list --agent "$AGENT" --json
 if [ "$HOST" = "codex" ]; then
-  echo "请另行确认: codex features list 中 multi_agent 为 stable true。"
+  echo "请另行确认: 在终端运行 codex features list,输出中 multi_agent 应为 stable true。"
 fi
 
 echo
 echo "安装完成。接下来:"
 echo "  1. 把题面 PDF 与官方附件放入 input/"
-echo "  2. 关闭旧的 $HOST 会话,在本目录新开会话"
+echo "  2. 在本目录新开 $HOST 会话(安装前已开的旧会话不会加载新 Skill;若有,先关闭)"
 echo "  3. 粘贴以下启动提示语:"
 echo
 if [ "$HOST" = "codex" ]; then
