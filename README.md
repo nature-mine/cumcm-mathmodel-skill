@@ -8,6 +8,8 @@
 本包定位为建模辅助、证据治理与质量门禁，不是“全自动出赛论文”工具。核心建模与分析、
 路线确认、最终图件和提交决定仍由参赛队负责；使用 AI 时必须遵守当届规则并完成披露。
 
+最终交付物为按推荐版式确定性导出的 DOCX 论文（含可编辑公式与图表）、附录源程序与支撑材料清单、AI 使用披露材料。
+
 ## 快速开始（3 步）
 
 前置条件：Node.js（含 `npx`），以及能启动 Codex 或 Claude Code 之一。Python 环境由流程
@@ -21,6 +23,7 @@ git clone https://github.com/nature-mine/cumcm-mathmodel-skill.git
 
 # 2. 在你的竞赛项目根目录执行一键安装（claude 或 codex 二选一）
 mkdir my-contest && cd my-contest
+# /path/to 替换为第 1 步克隆目录的实际路径
 bash /path/to/cumcm-mathmodel-skill/install.sh claude
 ```
 
@@ -28,7 +31,7 @@ bash /path/to/cumcm-mathmodel-skill/install.sh claude
 部署所选宿主的角色定义与 workflow、创建 `input/` 与 `data/`、执行安装验收，并在末尾打印
 第 3 步要用的启动提示语。
 
-第 3 步：把题面 PDF 与官方附件放进 `input/`（只读；清洗、修复等派生数据只写 `data/`，
+**第 3 步**：把题面 PDF 与官方附件放进 `input/`（只读；清洗、修复等派生数据只写 `data/`，
 不得覆盖官方文件）；关闭安装前已打开的旧宿主会话，在竞赛项目根新开所选宿主会话，粘贴
 `install.sh` 末尾打印的启动提示语。
 
@@ -52,12 +55,9 @@ bash /path/to/cumcm-mathmodel-skill/install.sh claude
 
 ### 接下来会发生什么
 
-`$cumcm-env-doctor` 先生成 `env_report.md` 与 `env_report.json`；随后 hub 发起 startup lock
-六问，必须由用户补齐题号、输入、交付物和规则等约束。模型路线确认是人工决策点，除非用户
-明确选择“全权委托”，否则不会代选。完整流程依次为：环境自检 → startup lock → 读题、数据
-剖析与分型 → 拆解 → 模型路线确认 → 契约派发循环 → 阶段推进与返工传播 → 最终评审与提交门禁。
-startup lock 会先初读输入以识别题面、附件和显式要求；后续“读题、数据剖析与分型”才是正式
-分析阶段。
+`$cumcm-env-doctor` 先生成 `env_report.md` 与 `env_report.json`；随后 hub 发起 startup lock 六问，必须由用户补齐竞赛与题号、输入附件、子问题与显式交付物、最终文件、当届及赛区规则、模型路线确认方式。startup lock 会先初读输入以识别题面、附件和显式要求；后续“读题、数据剖析与分型”才是正式分析阶段。模型路线确认是人工决策点，除非用户明确选择“全权委托”，否则不会代选。
+
+完整流程依次为：环境自检 → startup lock → 读题、数据剖析与分型 → 拆解 → 模型路线确认 → 契约派发循环 → 阶段推进与返工传播 → 最终评审与提交门禁。
 
 ## Skill 索引
 
@@ -66,7 +66,7 @@ startup lock 会先初读输入以识别题面、附件和显式要求；后续�
 - [`cumcm-modeling`](skills/cumcm-modeling/SKILL.md)：建立模型假设、符号、推导、验证方案与实现交接。
 - [`cumcm-coding`](skills/cumcm-coding/SKILL.md)：实现模型计算、结果落盘、数据图、运行记录与复现验证。
 - [`cumcm-diagram`](skills/cumcm-diagram/SKILL.md)：路由数据图、精确结构图与概念图并维护图件登记。
-- [`cumcm-writing`](skills/cumcm-writing/SKILL.md)：依据冻结证据撰写中文论文、组织附录与 AI 披露并导出 DOCX，随附可再生成的 [Markdown](skills/cumcm-writing/templates/paper-template.md)/[DOCX](skills/cumcm-writing/templates/paper-template.docx) 模板。
+- [`cumcm-writing`](skills/cumcm-writing/SKILL.md)：依据冻结证据撰写中文论文、组织附录与 AI 披露并导出 DOCX（支持 `[[EQUATION latex="..."]]` 块级可编辑公式与图表指令），随附可再生成的 [Markdown](skills/cumcm-writing/templates/paper-template.md)/[DOCX](skills/cumcm-writing/templates/paper-template.docx) 模板。
 - [`cumcm-review`](skills/cumcm-review/SKILL.md)：对建模件、代码件和论文件执行分步检查与最终独立评审。
 
 ## 手动安装（备选）
@@ -161,6 +161,8 @@ Codex custom agent 机制依据当前
 lock。Tier 1/2 缺项按报告安装或降级，不代表安装失败。
 
 ## 开发验证
+
+本节面向包维护者；参赛使用者无需执行。
 
 ```bash
 uv run pytest -q
