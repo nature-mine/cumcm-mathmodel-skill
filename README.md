@@ -66,7 +66,7 @@ bash /path/to/cumcm-mathmodel-skill/install.sh claude
 - [`cumcm-modeling`](skills/cumcm-modeling/SKILL.md)：建立模型假设、符号、推导、验证方案与实现交接。
 - [`cumcm-coding`](skills/cumcm-coding/SKILL.md)：实现模型计算、结果落盘、数据图、运行记录与复现验证。
 - [`cumcm-diagram`](skills/cumcm-diagram/SKILL.md)：路由数据图、精确结构图与概念图并维护图件登记。
-- [`cumcm-writing`](skills/cumcm-writing/SKILL.md)：依据冻结证据撰写中文论文、组织附录与 AI 披露并导出 DOCX（支持 [[EQUATION latex="..."]] 块级可编辑公式与图表指令），随附可再生成的 [Markdown](skills/cumcm-writing/templates/paper-template.md)/[DOCX](skills/cumcm-writing/templates/paper-template.docx) 模板。
+- [`cumcm-writing`](skills/cumcm-writing/SKILL.md)：依据冻结证据撰写中文论文、组织附录与 AI 披露并导出 DOCX（支持 `[[EQUATION latex="..."]]` 块级可编辑公式与图表指令），随附可再生成的 [Markdown](skills/cumcm-writing/templates/paper-template.md)/[DOCX](skills/cumcm-writing/templates/paper-template.docx) 模板。
 - [`cumcm-review`](skills/cumcm-review/SKILL.md)：对建模件、代码件和论文件执行分步检查与最终独立评审。
 
 ## 手动安装（备选）
