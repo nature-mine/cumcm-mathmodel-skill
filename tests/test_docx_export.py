@@ -186,6 +186,60 @@ def test_export_writes_editable_equation_and_remains_byte_deterministic(
     assert document_root.find(".//w:p/m:oMathPara", namespaces) is not None
 
 
+def test_export_preserves_matrix_row_separator(tmp_path: Path) -> None:
+    workspace, _ = _prepare_workspace(tmp_path)
+    module = _load_module("docx_export_matrix_equation")
+    source = workspace / "paper" / "matrix-equation.md"
+    source.write_text(
+        "# 矩阵公式\n\n"
+        r'[[EQUATION latex="\begin{matrix}a\\b\end{matrix}"]]' "\n",
+        encoding="utf-8",
+    )
+
+    summary = module.export_docx(
+        workspace,
+        "paper/matrix-equation.md",
+        "paper/matrix-equation.docx",
+    )
+
+    with zipfile.ZipFile(workspace / summary.output) as archive:
+        document_xml = archive.read("word/document.xml").decode("utf-8")
+    assert "<m:m>" in document_xml
+    assert document_xml.count("<m:mr>") == 2
+
+
+def test_parse_equation_directive_preserves_latex_backslashes() -> None:
+    module = _load_module("docx_export_parse_equation")
+
+    assert module._parse_directive(
+        r'[[EQUATION latex="y=\frac{a}{b}"]]'
+    ) == ("EQUATION", {"latex": r"y=\frac{a}{b}"})
+
+
+def test_export_rejects_unquoted_equation_latex_without_writing_docx(
+    tmp_path: Path,
+) -> None:
+    workspace, _ = _prepare_workspace(tmp_path)
+    module = _load_module("docx_export_unquoted_equation")
+    source = workspace / "paper" / "unquoted-equation.md"
+    source.write_text(
+        "# 无引号公式\n\n"
+        r"[[EQUATION latex=\frac{1}{2}]]" "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="EQUATION 的 latex 字段必须用双引号包裹，值内不得含双引号字符",
+    ):
+        module.export_docx(
+            workspace,
+            "paper/unquoted-equation.md",
+            "paper/unquoted-equation.docx",
+        )
+    assert not (workspace / "paper" / "unquoted-equation.docx").exists()
+
+
 @pytest.mark.parametrize(
     "latex",
     (

@@ -39,6 +39,7 @@ TIER0_PACKAGES = (
     ("openpyxl", "openpyxl", "openpyxl", "uv add openpyxl"),
     ("docx", "python-docx", "python-docx", "uv add python-docx"),
     ("latex2mathml", "latex2mathml", "latex2mathml", "uv add latex2mathml"),
+    ("lxml", "lxml", "lxml", "uv add lxml"),
 )
 TIER1_PACKAGES = (
     ("sklearn", "scikit-learn", "scikit-learn", "uv add scikit-learn"),
