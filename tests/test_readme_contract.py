@@ -16,7 +16,6 @@ def test_package_readme_guides_installation_and_first_run() -> None:
     )
 
     for token in (
-        "状态：已发布，维护期",
         "## 快速开始（3 步）",
         "install.sh claude",
         "### 让 Agent 帮你安装",

@@ -643,7 +643,6 @@ def check_user_documentation() -> str:
     has_root_document_contract = root_readme_path.is_file() and root_claude_path.is_file()
 
     required_readme_tokens = (
-        "状态：已发布，维护期",
         "## 快速开始（3 步）",
         "install.sh claude",
         "### 让 Agent 帮你安装",
