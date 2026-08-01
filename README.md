@@ -140,12 +140,16 @@ P0 未清零不得提交。
 > 约定——“`$` + Skill 名”，Agent 在提示语里看到它就会加载同名 Skill。它不是环境变量，
 > 也不需要你执行什么，照原样粘贴即可。
 
+第 2 步必须在竞赛项目根目录执行。下面以新建 `my-contest/` 为例；若项目已经存在，不要执行
+`mkdir`，直接进入现有项目根目录后运行安装命令。
+
 ```bash
 # 1. 克隆本包（任意位置，只需一次）
 git clone https://github.com/nature-mine/cumcm-mathmodel-skill.git
 
-# 2. 在你的竞赛项目根目录执行一键安装（claude 或 codex 二选一）
-mkdir my-contest && cd my-contest
+# 2. 新建并进入示例竞赛项目（已有项目直接 cd 到其根目录）
+mkdir my-contest
+cd my-contest
 # /path/to 替换为第 1 步克隆目录的实际路径
 bash /path/to/cumcm-mathmodel-skill/install.sh claude
 ```
